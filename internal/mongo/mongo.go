@@ -10,11 +10,13 @@ import (
 	"github.com/ucpr/mongo-streamer/internal/config"
 )
 
+// Client is a MongoDB client.
 type Client struct {
 	cli *mongo.Client
 	db  string
 }
 
+// NewClient creates a new MongoDB client.
 func NewClient(ctx context.Context, cfg config.MongoDB) (*Client, error) {
 	api := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().
@@ -26,7 +28,7 @@ func NewClient(ctx context.Context, cfg config.MongoDB) (*Client, error) {
 		SetServerAPIOptions(api)
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to MongoDB instance: %w", err)
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
@@ -39,6 +41,7 @@ func NewClient(ctx context.Context, cfg config.MongoDB) (*Client, error) {
 	}, nil
 }
 
+// Disconnect disconnects the client from the MongoDB instance.
 func (c *Client) Disconnect(ctx context.Context) error {
 	return c.cli.Disconnect(ctx)
 }
