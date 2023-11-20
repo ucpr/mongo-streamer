@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  primary:
+    image: mongo:latest
+    command: mongod --replSet rs0 --bind_ip_all
+    ports:
+      - "27017:27017"
+    volumes:
+      - primary_data:/data/db
+
+  secondary1:
+    image: mongo:latest
+    command: mongod --replSet rs0 --bind_ip_all
+    ports:
+      - "27018:27017"
+    volumes:
+      - secondary1_data:/data/db
+
+  secondary2:
+    image: mongo:latest
+    command: mongod --replSet rs0 --bind_ip_all
+    ports:
+      - "27019:27017"
+    volumes:
+      - secondary2_data:/data/db
+
+  setup-replica:
+    image: mongo:latest
+    depends_on:
+      - primary
+      - secondary1
+      - secondary2
+    command: >
+      bash -c "echo 'Waiting for MongoDB to start...' && sleep 10 &&
+      mongosh --host primary --eval '
+        rs.initiate({
+          _id: \"rs0\",
+          members: [
+            { _id: 0, host: \"primary:27017\" },
+            { _id: 1, host: \"secondary1:27017\" },
+            { _id: 2, host: \"secondary2:27017\" }
+          ]
+        })'"
+
+  go-app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - primary
+    environment:
+      MONGO_URI: "mongodb://root:example@primary:27017/"
+
+volumes:
+  primary_data:
+  secondary1_data:
+  secondary2_data:
