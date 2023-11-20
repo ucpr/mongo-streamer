@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
+
+	_ "github.com/ucpr/mongo-streamer/internal/log"
 )
 
 func main() {
-	fmt.Println("Hello World")
+	slog.Info("Hello World")
 }
