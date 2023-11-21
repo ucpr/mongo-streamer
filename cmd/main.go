@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"os/signal"
 	"syscall"
 	"time"
 
-	_ "github.com/ucpr/mongo-streamer/internal/log"
+	"github.com/ucpr/mongo-streamer/internal/log"
 )
 
 const (
@@ -23,5 +22,5 @@ func main() {
 	defer cancel()
 	_ = tctx
 
-	slog.Info("successfully graceful shutdown")
+	log.Info("successfully graceful shutdown")
 }
