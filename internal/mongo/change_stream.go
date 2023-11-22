@@ -3,10 +3,9 @@ package mongo
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/ucpr/mongo-streamer/internal/log"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,27 +25,8 @@ type (
 	// ChangeStreamOption is a type of option function for change stream.
 	ChangeStreamOption func(opts *ChangeStreamOptions)
 
-	// StreamObject is a struct that represents a change stream object.
-	StreamObject struct {
-		ID struct {
-			Data string `bson:"_data"`
-		} `bson:"_id"`
-		OperationType  string           `bson:"operationType"`
-		ClusterTime    time.Time        `bson:"clusterTime"`
-		CollectionUUID primitive.Binary `bson:"collectionUUID"`
-		WallTime       time.Time        `bson:"wallTime"`
-		FullDocument   []byte           `bson:"fullDocument"`
-		Namespace      struct {
-			DB   string `bson:"db"`
-			Coll string `bson:"coll"`
-		} `bson:"ns"`
-		DocumentKey struct {
-			ID primitive.ObjectID `bson:"_id"`
-		} `bson:"documentKey"`
-	}
-
 	// ChangeStreamHandler is a type of handler function that handles ChangeStream.
-	ChangeStreamHandler func(ctx context.Context, event *StreamObject) error
+	ChangeStreamHandler func(ctx context.Context, event []byte) error
 )
 
 // WithResumeToken sets the resume token for ChangeStream.
@@ -85,13 +65,20 @@ func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler C
 // Run starts watching change stream.
 func (c *ChangeStream) Run() {
 	for c.cs.Next(context.Background()) {
-		var streamObject StreamObject
+		var streamObject bson.M
 		if err := c.cs.Decode(&streamObject); err != nil {
 			log.Error("failed to decode steream object", slog.String("err", err.Error()))
 			continue
 		}
 
-		if err := c.handler(context.Background(), &streamObject); err != nil {
+		// marshal stream object to json
+		jb, err := bson.MarshalExtJSON(streamObject, false, false)
+		if err != nil {
+			log.Error("failed to marshal stream object", slog.String("err", err.Error()))
+			continue
+		}
+
+		if err := c.handler(context.Background(), jb); err != nil {
 			log.Error("failed to handle change stream", slog.String("err", err.Error()))
 		}
 	}

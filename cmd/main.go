@@ -16,8 +16,8 @@ const (
 	gracefulShutdownTimeout = 5 * time.Second
 )
 
-func eventHandler(ctx context.Context, event *mongo.StreamObject) error {
-	log.Info("event", slog.Any("event", event))
+func eventHandler(ctx context.Context, event []byte) error {
+	log.Info("event", slog.String("event", string(event)))
 	return nil
 }
 
