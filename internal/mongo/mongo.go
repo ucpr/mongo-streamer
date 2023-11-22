@@ -17,20 +17,24 @@ type Client struct {
 }
 
 // NewClient creates a new MongoDB client.
-func NewClient(ctx context.Context, cfg config.MongoDB) (*Client, error) {
+func NewClient(ctx context.Context, cfg *config.MongoDB) (*Client, error) {
 	api := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().
 		ApplyURI(cfg.URI).
-		SetAuth(options.Credential{
+		SetServerAPIOptions(api)
+
+	// Set authentication options if user and password are provided.
+	if cfg.User != "" && cfg.Password != "" {
+		opts.SetAuth(options.Credential{
 			Username: cfg.User,
 			Password: cfg.Password,
-		}).
-		SetServerAPIOptions(api)
+		})
+	}
+
 	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to MongoDB instance: %w", err)
 	}
-
 	if err := client.Ping(ctx, nil); err != nil {
 		return nil, fmt.Errorf("failed to ping MongoDB instance: %w", err)
 	}
