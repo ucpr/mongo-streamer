@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.2
+
+      - name: Setup Go
+        uses: actions/setup-go@v4.1.0
+        id: setup-go
+        with:
+          go-version-file: ./go.mod
+          cache-dependency-path: ./go.sum
+
+      - name: Download Go modules
+        shell: bash
+        if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Test
+        run: make test
+
+      - name: Build
+        run: make build
