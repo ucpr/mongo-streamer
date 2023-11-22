@@ -8,7 +8,7 @@ MongoStreamer is a system that can watch MongoDB ChangeStreams and transfer them
 
 // TODO
 
-## Contributing
+## Contributions
 
 Contributions of any kind welcome!
 
