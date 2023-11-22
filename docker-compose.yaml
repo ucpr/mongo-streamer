@@ -3,7 +3,7 @@ version: '3.8'
 services:
   primary:
     image: mongo:latest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: mongod --replSet rs0 --bind_ip_all --noauth
     ports:
       - "27017:27017"
     volumes:
@@ -11,7 +11,7 @@ services:
 
   secondary1:
     image: mongo:latest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: mongod --replSet rs0 --bind_ip_all --noauth
     ports:
       - "27018:27017"
     volumes:
@@ -19,7 +19,7 @@ services:
 
   secondary2:
     image: mongo:latest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: mongod --replSet rs0 --bind_ip_all --noauth
     ports:
       - "27019:27017"
     volumes:
@@ -37,20 +37,22 @@ services:
         rs.initiate({
           _id: \"rs0\",
           members: [
-            { _id: 0, host: \"primary:27017\" },
-            { _id: 1, host: \"secondary1:27017\" },
-            { _id: 2, host: \"secondary2:27017\" }
+            { _id: 0, host: \"primary:27017\", priority: 100 },
+            { _id: 1, host: \"secondary1:27017\", priority: 50 },
+            { _id: 2, host: \"secondary2:27017\", priority: 50 }
           ]
-        })'"
+        })'" &&
+      echo 'Finished setting up the replica set...'
 
-  go-app:
+  mongo-streamer:
     build: .
-    ports:
-      - "8080:8080"
     depends_on:
       - primary
+    restart: always
     environment:
-      MONGO_URI: "mongodb://root:example@primary:27017/"
+      ENV: "dev"
+      LOG_LEVEL: "INFO"
+      MONGO_DB_URI: "mongodb://primary:27017/test?tls=false&directConnection=true"
 
 volumes:
   primary_data:
