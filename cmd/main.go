@@ -44,16 +44,13 @@ func main() {
 		log.Info("starting change stream watcher")
 		cs.Run()
 	}()
-	defer func() {
-		if err := cs.Close(ctx); err != nil {
-			log.Error("failed to close change stream", err)
-		}
-	}()
 
 	<-ctx.Done()
 	tctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
-	_ = tctx
+	if err := cs.Close(tctx); err != nil {
+		log.Error("failed to close change stream", err)
+	}
 
 	log.Info("successfully graceful shutdown")
 }
