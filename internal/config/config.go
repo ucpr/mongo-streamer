@@ -3,7 +3,13 @@ package config
 import (
 	"context"
 
+	"github.com/google/wire"
 	envconfig "github.com/sethvargo/go-envconfig"
+)
+
+// Set is a Wire provider set that provides configuration.
+var Set = wire.NewSet(
+	NewMongoDB,
 )
 
 const (

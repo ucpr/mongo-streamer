@@ -7,9 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ucpr/mongo-streamer/internal/config"
 	"github.com/ucpr/mongo-streamer/internal/log"
-	"github.com/ucpr/mongo-streamer/internal/mongo"
 )
 
 const (
@@ -26,29 +24,19 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 	defer stop()
 
-	cfg, err := config.NewMongoDB(ctx)
+	streamer, err := injectStreamer(ctx)
 	if err != nil {
-		log.Panic("failed to get environment variables", err)
+		log.Panic("failed to inject streamer", err)
 	}
 
-	mcli, err := mongo.NewClient(ctx, cfg)
-	if err != nil {
-		log.Panic("failed to create mongo client", err)
-	}
-
-	cs, err := mongo.NewChangeStream(ctx, mcli, "test", "test", eventHandler)
-	if err != nil {
-		log.Panic("failed to create change stream", err)
-	}
 	go func() {
-		log.Info("starting change stream watcher")
-		cs.Run()
+		streamer.Stream(ctx)
 	}()
 
 	<-ctx.Done()
 	tctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
-	if err := cs.Close(tctx); err != nil {
+	if err := streamer.Close(tctx); err != nil {
 		log.Error("failed to close change stream", err)
 	}
 

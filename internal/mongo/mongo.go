@@ -4,10 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/ucpr/mongo-streamer/internal/config"
+)
+
+// Set is a Wire provider set that provides a MongoDB client.
+var Set = wire.NewSet(
+	NewClient,
 )
 
 // Client is a MongoDB client.

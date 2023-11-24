@@ -4,8 +4,14 @@ GO ?= go
 
 .PHONY: build
 build:
-	$(GO) build -o $(BUILD_DIR)/$(NAME) ./cmd/main.go
+	$(GO) build -o $(BUILD_DIR)/$(NAME) ./cmd
 
 .PHONY: test
+test: PKG ?= ./...
 test:
-	go test -race ./...
+	$(GO) test -race $(PKG)
+
+.PHONY: generate
+generate: PKG ?= ./...
+generate:
+	$(GO) generate $(PKG)
