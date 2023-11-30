@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY ./ ./
 
-RUN go mod download && go build -o ./build/mongo-streamer ./cmd/main.go
+RUN go mod download && go build -o ./build/mongo-streamer ./cmd
 
 ## Runner
 FROM alpine:3.18
