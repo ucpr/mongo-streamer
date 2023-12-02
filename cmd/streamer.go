@@ -23,7 +23,7 @@ func NewStreamer(ctx context.Context, cli *mongo.Client) (*Streamer, error) {
 
 func (s *Streamer) Stream(ctx context.Context) {
 	log.Info("starting change stream watcher")
-	s.cs.Run()
+	s.cs.Run(ctx)
 }
 
 func (s *Streamer) Close(ctx context.Context) error {

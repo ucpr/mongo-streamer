@@ -63,8 +63,8 @@ func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler C
 }
 
 // Run starts watching change stream.
-func (c *ChangeStream) Run() {
-	for c.cs.Next(context.Background()) {
+func (c *ChangeStream) Run(ctx context.Context) {
+	for c.cs.Next(ctx) {
 		var streamObject bson.M
 		if err := c.cs.Decode(&streamObject); err != nil {
 			log.Error("failed to decode steream object", slog.String("err", err.Error()))
