@@ -44,6 +44,23 @@ services:
         })'" &&
       echo 'Finished setting up the replica set...'
 
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:455.0.0-emulators
+    command: >
+      gcloud beta emulators pubsub start --project=dummy-project --host-port=localhost:8085 --quiet &
+      while ! nc -z localhost 8085; do
+        sleep 0.1
+      done
+      python3 /python-pubsub/samples/snippets/publisher.py dummy-project create dummy-topic
+      fg %1
+    environment: # TODO: use environment variables
+      PUBSUB_PROJECT_ID: "emulator"
+      PUBSUB_EMULATOR_HOST: "localhost:8085"
+      PUBSUB_TOPIC_ID: "dymmy-topic"
+    ports:
+      - "8085:8085"
+    entrypoint: /bin/bash
+
   mongo-streamer:
     build: .
     depends_on:
