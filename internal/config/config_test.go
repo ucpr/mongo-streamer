@@ -53,3 +53,42 @@ func TestMongoDB(t *testing.T) {
 		})
 	}
 }
+
+func TestMetrics(t *testing.T) {
+	ctx := context.Background()
+
+	patterns := []struct {
+		name  string
+		setup func(t *testing.T)
+		want  *Metrics
+	}{
+		{
+			name: "default",
+			setup: func(t *testing.T) {
+				t.Helper()
+			},
+			want: &Metrics{},
+		},
+		{
+			name: "set envs",
+			setup: func(t *testing.T) {
+				t.Helper()
+				t.Setenv("METRICS_ADDR", "localhost:8080")
+			},
+			want: &Metrics{
+				Addr: "localhost:8080",
+			},
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup(t)
+
+			got, err := NewMetrics(ctx)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

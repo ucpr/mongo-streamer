@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
@@ -22,6 +24,16 @@ func main() {
 	if err != nil {
 		log.Panic("failed to inject streamer", err)
 	}
+	srv, err := injectServer(ctx)
+	if err != nil {
+		log.Panic("failed to inject server", err)
+	}
+
+	go func() {
+		if err := srv.Serve(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("failed to start http server", err)
+		}
+	}()
 
 	go func() {
 		streamer.Stream(ctx)
@@ -30,6 +42,9 @@ func main() {
 	<-ctx.Done()
 	tctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
+	if err := srv.Shutdown(tctx); err != nil {
+		log.Error("failed to shutdown http server", err)
+	}
 	if err := streamer.Close(tctx); err != nil {
 		log.Error("failed to close change stream", err)
 	}

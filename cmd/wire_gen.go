@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"github.com/ucpr/mongo-streamer/internal/config"
+	"github.com/ucpr/mongo-streamer/internal/http"
 	"github.com/ucpr/mongo-streamer/internal/mongo"
 )
 
@@ -28,4 +29,13 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 		return nil, err
 	}
 	return streamer, nil
+}
+
+func injectServer(ctx context.Context) (*http.Server, error) {
+	metrics, err := config.NewMetrics(ctx)
+	if err != nil {
+		return nil, err
+	}
+	server := http.NewServer(metrics)
+	return server, nil
 }
