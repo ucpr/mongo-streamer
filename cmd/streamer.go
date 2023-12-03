@@ -34,5 +34,11 @@ func (s *Streamer) Stream(ctx context.Context) {
 }
 
 func (s *Streamer) Close(ctx context.Context) error {
-	return s.cs.Close(ctx)
+	if err := s.cs.Close(ctx); err != nil {
+		return err
+	}
+	if err := s.cli.Disconnect(ctx); err != nil {
+		return err
+	}
+	return nil
 }
