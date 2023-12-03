@@ -11,6 +11,11 @@ test: PKG ?= ./...
 test:
 	$(GO) test -race $(PKG)
 
+.PHONY: integration-test
+integration-test: PKG ?= ./...
+integration-test:
+	$(GO) test -race $(PKG) -tags=integration
+
 .PHONY: generate
 generate: PKG ?= ./...
 generate:
