@@ -23,7 +23,7 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 	if err != nil {
 		return nil, err
 	}
-	streamer, err := NewStreamer(ctx, client)
+	streamer, err := NewStreamer(ctx, client, mongoDB)
 	if err != nil {
 		return nil, err
 	}

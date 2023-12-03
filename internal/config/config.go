@@ -17,10 +17,11 @@ const (
 )
 
 type MongoDB struct {
-	URI      string `env:"URI"`
-	Password string `env:"PASSWORD"`
-	User     string `env:"USER"`
-	Database string `env:"DATABASE"`
+	URI        string `env:"URI"`
+	Password   string `env:"PASSWORD"`
+	User       string `env:"USER"`
+	Database   string `env:"DATABASE"`
+	Collection string `env:"COLLECTION"`
 }
 
 func NewMongoDB(ctx context.Context) (*MongoDB, error) {

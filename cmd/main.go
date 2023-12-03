@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"os/signal"
 	"syscall"
 	"time"
@@ -13,11 +12,6 @@ import (
 const (
 	gracefulShutdownTimeout = 5 * time.Second
 )
-
-func eventHandler(ctx context.Context, event []byte) error {
-	log.Info("event", slog.String("event", string(event)))
-	return nil
-}
 
 func main() {
 	log.Info("initializing mongo-streamer")

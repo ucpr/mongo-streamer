@@ -30,12 +30,14 @@ func TestMongoDB(t *testing.T) {
 				t.Setenv("MONGO_DB_USER", "root")
 				t.Setenv("MONGO_DB_PASSWORD", "pass")
 				t.Setenv("MONGO_DB_DATABASE", "database")
+				t.Setenv("MONGO_DB_COLLECTION", "col")
 			},
 			want: &MongoDB{
-				URI:      "mongodb://localhost:27017",
-				Password: "pass",
-				User:     "root",
-				Database: "database",
+				URI:        "mongodb://localhost:27017",
+				Password:   "pass",
+				User:       "root",
+				Database:   "database",
+				Collection: "col",
 			},
 		},
 	}
