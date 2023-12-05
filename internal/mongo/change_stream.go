@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/ucpr/mongo-streamer/internal/log"
@@ -51,10 +52,22 @@ func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler C
 	}
 
 	pipeline := mongo.Pipeline{}
-	changeStream, err := cli.cli.Database(db).Collection(col).Watch(ctx, pipeline, chopts)
+	collection := cli.cli.Database(db).Collection(col)
+	changeStream, err := collection.Watch(ctx, pipeline, chopts)
 	if err != nil {
-		return nil, err
+		// if resume token is not found, reset resume token and retry
+		if errors.Is(err, mongo.ErrMissingResumeToken) {
+			log.Warn("resume token is not found, reset resume token and retry", slog.String("db", db), slog.String("col", col))
+			chopts.SetResumeAfter(nil)
+			changeStream, err = collection.Watch(ctx, pipeline, chopts)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
+
 	cs := &ChangeStream{
 		cs:      changeStream,
 		handler: handler,
