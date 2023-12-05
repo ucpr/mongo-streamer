@@ -2,7 +2,6 @@ package persistent
 
 import (
 	"context"
-	"os"
 	"sync"
 	"time"
 
@@ -14,31 +13,32 @@ const (
 	defaultBufferCap = 50
 )
 
+type Storage interface {
+	Write(s string) error
+	Clear() error
+	Read() (string, error)
+	Close(ctx context.Context) error
+}
+
 type Buffer struct {
 	sync.Mutex
+
 	// data is the slice of strings that the buffer holds
 	data []string
 	// cap is the maximum number of elements in the buffer
 	cap int
 	// interval is the interval at which the buffer is flushed
 	interval time.Duration
-	// file is the file to which the buffer is flushed
-	file *os.File
+	// storage is the storage that writes the buffer to the persistent storage
+	storage Storage
 }
 
 // NewBuffer creates a new buffer with the given capacity
-func NewBuffer(cap int, interval time.Duration, filepath string) (*Buffer, error) {
-	// TODO: check exists dir
-	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
-	if err != nil {
-		return nil, err
-	}
-
+func NewBuffer(cap int, interval time.Duration, writer Storage) (*Buffer, error) {
 	buf := &Buffer{
 		data:     make([]string, 0, cap),
 		cap:      cap,
 		interval: interval,
-		file:     f,
 	}
 	if cap < 0 {
 		buf.cap = defaultBufferCap
@@ -76,12 +76,17 @@ func (b *Buffer) Set(s string) error {
 	return nil
 }
 
-// Get returns the last element of the buffer
-func (b *Buffer) Get() string {
+// Get returns data from persistent storage
+func (b *Buffer) Get() (string, error) {
 	b.Lock()
 	defer b.Unlock()
 
-	return b.data[len(b.data)-1]
+	s, err := b.storage.Read()
+	if err != nil {
+		return "", err
+	}
+
+	return s, nil
 }
 
 // Flush writes the buffer to the persistent storage.
@@ -99,7 +104,7 @@ func (b *Buffer) Flush() error {
 	data := b.data[len(b.data)-1]
 
 	// save bufferd data to file
-	if _, err := b.file.WriteString(data); err != nil {
+	if err := b.storage.Write(data); err != nil {
 		return err
 	}
 
@@ -109,10 +114,24 @@ func (b *Buffer) Flush() error {
 	return nil
 }
 
+// Clear clears the buffer and saved data
+func (b *Buffer) Clear() error {
+	b.Lock()
+	defer b.Unlock()
+
+	if err := b.storage.Clear(); err != nil {
+		return err
+	}
+
+	b.data = make([]string, 0, b.cap)
+
+	return nil
+}
+
 // Close closes the Buffer
-func (b *Buffer) Close() error {
+func (b *Buffer) Close(ctx context.Context) error {
 	defer func() {
-		if err := b.file.Close(); err != nil {
+		if err := b.storage.Close(ctx); err != nil {
 			log.Error("failed to close file", err)
 		}
 	}()
