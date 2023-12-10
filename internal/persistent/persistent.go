@@ -20,6 +20,15 @@ type Storage interface {
 	Close(ctx context.Context) error
 }
 
+type StorageBuffer interface {
+	Watch(ctx context.Context)
+	Set(s string) error
+	Get() (string, error)
+	Flush() error
+	Clear() error
+	Close(ctx context.Context) error
+}
+
 type Buffer struct {
 	sync.Mutex
 
@@ -39,6 +48,7 @@ func NewBuffer(cap int, interval time.Duration, writer Storage) (*Buffer, error)
 		data:     make([]string, 0, cap),
 		cap:      cap,
 		interval: interval,
+		storage:  writer,
 	}
 	if cap < 0 {
 		buf.cap = defaultBufferCap
@@ -57,7 +67,7 @@ func (b *Buffer) Watch(ctx context.Context) {
 			}
 		case <-ctx.Done():
 			log.Info("buffer watcher stopped")
-			break
+			return
 		}
 	}
 }
@@ -128,7 +138,8 @@ func (b *Buffer) Clear() error {
 	return nil
 }
 
-// Close closes the Buffer
+// Close closes the Buffer.
+// flush the data in the buffer before close
 func (b *Buffer) Close(ctx context.Context) error {
 	defer func() {
 		if err := b.storage.Close(ctx); err != nil {

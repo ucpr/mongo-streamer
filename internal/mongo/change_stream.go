@@ -10,13 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/ucpr/mongo-streamer/internal/log"
+	"github.com/ucpr/mongo-streamer/internal/persistent"
 )
 
 type (
 	// ChangeStream is a struct that represents a change stream.
 	ChangeStream struct {
-		cs      *mongo.ChangeStream
-		handler ChangeStreamHandler
+		cs           *mongo.ChangeStream
+		handler      ChangeStreamHandler
+		tokenManager persistent.StorageBuffer
 	}
 
 	// ChangeStreamOptions is a struct that represents options for change stream.
@@ -31,13 +33,6 @@ type (
 	ChangeStreamHandler func(ctx context.Context, event []byte) error
 )
 
-// WithResumeToken sets the resume token for ChangeStream.
-func WithResumeToken(resumeToken string) ChangeStreamOption {
-	return func(o *ChangeStreamOptions) {
-		o.ResumeAfter = resumeToken
-	}
-}
-
 // WithBatchSize sets the batch size for ChangeStream.
 func WithBatchSize(batchSize int32) ChangeStreamOption {
 	return func(o *ChangeStreamOptions) {
@@ -46,12 +41,21 @@ func WithBatchSize(batchSize int32) ChangeStreamOption {
 }
 
 // NewChangeStream creates a new change stream instance.
-func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler ChangeStreamHandler, opts ...ChangeStreamOption) (*ChangeStream, error) {
+func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler ChangeStreamHandler, st persistent.StorageBuffer, opts ...ChangeStreamOption) (*ChangeStream, error) {
 	chopts := &options.ChangeStreamOptions{}
 	for _, opt := range opts {
 		opt(&ChangeStreamOptions{chopts})
 	}
 
+	rt, err := st.Get()
+	if err != nil {
+		return nil, err
+	}
+	if rt != "" {
+		chopts.SetResumeAfter(rt)
+	}
+
+	// TODO: refactor
 	pipeline := mongo.Pipeline{}
 	collection := cli.cli.Database(db).Collection(col)
 	changeStream, err := collection.Watch(ctx, pipeline, chopts)
@@ -60,6 +64,10 @@ func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler C
 		if errors.Is(err, mongo.ErrMissingResumeToken) {
 			log.Warn("resume token is not found, reset resume token and retry", slog.String("db", db), slog.String("col", col))
 			chopts.SetResumeAfter(nil)
+			if err := st.Clear(); err != nil {
+				return nil, err
+			}
+
 			changeStream, err = collection.Watch(ctx, pipeline, chopts)
 			if err != nil {
 				return nil, err
@@ -70,8 +78,9 @@ func NewChangeStream(ctx context.Context, cli *Client, db, col string, handler C
 	}
 
 	cs := &ChangeStream{
-		cs:      changeStream,
-		handler: handler,
+		cs:           changeStream,
+		handler:      handler,
+		tokenManager: st,
 	}
 	return cs, nil
 }
@@ -94,12 +103,20 @@ func (c *ChangeStream) Run(ctx context.Context) {
 
 		if err := c.handler(context.Background(), jb); err != nil {
 			log.Error("failed to handle change stream", slog.String("err", err.Error()))
+			// TODO: If handle fails, the process is repeated again
+			continue
+		}
+
+		// save resume token
+		if err := c.tokenManager.Set(c.resumeToken()); err != nil {
+			log.Error("failed to save resume token", slog.String("err", err.Error()))
+			continue
 		}
 	}
 }
 
-// ResumeToken returns the resume token of the change stream.
-func (c *ChangeStream) ResumeToken() string {
+// resumeToken returns the resume token of the change stream.
+func (c *ChangeStream) resumeToken() string {
 	return c.cs.ResumeToken().String()
 }
 
