@@ -8,6 +8,7 @@ import (
 	"github.com/google/wire"
 
 	"github.com/ucpr/mongo-streamer/internal/config"
+	"github.com/ucpr/mongo-streamer/internal/metric"
 )
 
 //nolint:gochecknoglobals
@@ -27,6 +28,7 @@ type Server struct {
 func NewServer(cfg *config.Metrics) *Server {
 	mux := http.NewServeMux()
 	mux.Handle("/health", http.HandlerFunc(health))
+	metric.Register(mux)
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
