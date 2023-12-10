@@ -5,10 +5,11 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/ucpr/mongo-streamer/internal/log"
 )
 
 type (
