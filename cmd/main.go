@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"os/signal"
 	"syscall"
@@ -11,12 +12,23 @@ import (
 	"github.com/ucpr/mongo-streamer/internal/log"
 )
 
+var (
+	// inject by ldflags
+	BuildVersion   = ""
+	BuildRevision  = ""
+	BuildTimestamp = ""
+)
+
 const (
 	gracefulShutdownTimeout = 5 * time.Second
 )
 
 func main() {
-	log.Info("initializing mongo-streamer")
+	log.Info("initializing mongo-streamer",
+		slog.String("version", BuildVersion),
+		slog.String("revision", BuildRevision),
+		slog.String("timestamp", BuildTimestamp),
+	)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 	defer stop()
 
