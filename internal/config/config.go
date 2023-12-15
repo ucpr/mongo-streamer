@@ -10,11 +10,13 @@ import (
 // Set is a Wire provider set that provides configuration.
 var Set = wire.NewSet(
 	NewMongoDB,
+	NewPubSub,
 	NewMetrics,
 )
 
 const (
 	mongoDBPrefix = "MONGO_DB_"
+	pubSubPrefix  = "PUBSUB_"
 	mrtricsPrefix = "METRICS_"
 )
 
@@ -26,6 +28,11 @@ type MongoDB struct {
 	Collection string `env:"COLLECTION"`
 }
 
+type PubSub struct {
+	ProjectID string `env:"PROJECT_ID"`
+	TopicID   string `env:"TOPIC_ID"`
+}
+
 type Metrics struct {
 	Addr string `env:"ADDR"`
 }
@@ -33,6 +40,16 @@ type Metrics struct {
 func NewMongoDB(ctx context.Context) (*MongoDB, error) {
 	conf := &MongoDB{}
 	pl := envconfig.PrefixLookuper(mongoDBPrefix, envconfig.OsLookuper())
+	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+		return nil, err
+	}
+
+	return conf, nil
+}
+
+func NewPubSub(ctx context.Context) (*PubSub, error) {
+	conf := &PubSub{}
+	pl := envconfig.PrefixLookuper(pubSubPrefix, envconfig.OsLookuper())
 	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
 		return nil, err
 	}
