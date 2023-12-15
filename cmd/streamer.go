@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"time"
 
 	"github.com/ucpr/mongo-streamer/internal/config"
@@ -17,13 +16,13 @@ type Streamer struct {
 	st  persistent.StorageBuffer
 }
 
-func NewStreamer(ctx context.Context, cli *mongo.Client, mcfg *config.MongoDB) (*Streamer, error) {
+func NewStreamer(ctx context.Context, cli *mongo.Client, mcfg *config.MongoDB, eh *EventHandler) (*Streamer, error) {
 	stLog := persistent.NewLogWriter()
 	st, err := persistent.NewBuffer(10, 5*time.Second, stLog)
 	if err != nil {
 		return nil, err
 	}
-	cs, err := mongo.NewChangeStream(ctx, cli, mcfg.Database, mcfg.Collection, eventHandler, st)
+	cs, err := mongo.NewChangeStream(ctx, cli, mcfg.Database, mcfg.Collection, eh.EventHandler, st)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +32,6 @@ func NewStreamer(ctx context.Context, cli *mongo.Client, mcfg *config.MongoDB) (
 		cs:  cs,
 		st:  st,
 	}, nil
-}
-
-func eventHandler(ctx context.Context, event []byte) error {
-	log.Info("event", slog.String("event", string(event)))
-	return nil
 }
 
 func (s *Streamer) Stream(ctx context.Context) {

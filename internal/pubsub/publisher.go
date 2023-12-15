@@ -5,6 +5,14 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/google/wire"
+	"github.com/ucpr/mongo-streamer/internal/config"
+)
+
+//golint:gochecknoglobals
+var Set = wire.NewSet(
+	wire.Bind(new(Publisher), new(*PubSubPublisher)),
+	NewPublisher,
 )
 
 const (
@@ -36,13 +44,13 @@ type PubSubPublisher struct {
 var _ Publisher = (*PubSubPublisher)(nil)
 
 // NewPublisher creates a new publisher.
-func NewPublisher(ctx context.Context, projectID, topicID string) (*PubSubPublisher, error) {
-	cli, err := pubsub.NewClient(ctx, projectID)
+func NewPublisher(ctx context.Context, cfg *config.PubSub) (*PubSubPublisher, error) {
+	cli, err := pubsub.NewClient(ctx, cfg.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 
-	topic := cli.Topic(topicID)
+	topic := cli.Topic(cfg.TopicID)
 	// Set the default values for PublishSettings.
 	topic.PublishSettings.ByteThreshold = publisherByteThreshold
 	topic.PublishSettings.CountThreshold = publisherCountThreshold

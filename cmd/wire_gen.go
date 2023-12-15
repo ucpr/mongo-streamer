@@ -11,6 +11,7 @@ import (
 	"github.com/ucpr/mongo-streamer/internal/config"
 	"github.com/ucpr/mongo-streamer/internal/http"
 	"github.com/ucpr/mongo-streamer/internal/mongo"
+	"github.com/ucpr/mongo-streamer/internal/pubsub"
 )
 
 // Injectors from wire.go:
@@ -24,7 +25,16 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 	if err != nil {
 		return nil, err
 	}
-	streamer, err := NewStreamer(ctx, client, mongoDB)
+	pubSub, err := config.NewPubSub(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pubSubPublisher, err := pubsub.NewPublisher(ctx, pubSub)
+	if err != nil {
+		return nil, err
+	}
+	eventHandler := NewEventHandler(pubSubPublisher)
+	streamer, err := NewStreamer(ctx, client, mongoDB, eventHandler)
 	if err != nil {
 		return nil, err
 	}
