@@ -39,6 +39,15 @@ services:
       - "8085:8085"
     entrypoint: /bin/bash
 
+  pubsub-init:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:455.0.0-emulators
+    depends_on:
+      - pubsub-emulator
+    environment:
+      PUBSUB_EMULATOR_HOST: "pubsub-emulator:8085"
+    command: |
+      gcloud config configurations create emulator && gcloud config set project dummy-project && gcloud config set auth/disable_credentials true && gcloud pubsub topics create dummy-topic && echo "finish setup pubsub"
+
   mongo-streamer:
     build: .
     restart: always

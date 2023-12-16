@@ -20,5 +20,13 @@ func NewEventHandler(ps pubsub.Publisher) *EventHandler {
 
 func (e *EventHandler) EventHandler(ctx context.Context, event []byte) error {
 	log.Info("event", slog.String("event", string(event)))
+	res := e.pubsub.AsyncPublish(ctx, pubsub.Message{
+		Data: event,
+	})
+	id, err := res.Get(ctx)
+	if err != nil {
+		return err
+	}
+	log.Info("successful publish event", slog.String("id", id))
 	return nil
 }
