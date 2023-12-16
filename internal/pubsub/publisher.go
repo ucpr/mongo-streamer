@@ -6,6 +6,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"github.com/google/wire"
+
 	"github.com/ucpr/mongo-streamer/internal/config"
 )
 
