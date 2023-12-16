@@ -57,6 +57,13 @@ services:
       - mongo-arbiter
     ports:
       - "8080:8080"
+    develop:
+      watch:
+        - action: rebuild
+          files:
+            - ./**/*.go
+            - ./go.mod
+            - ./go.sum
     environment:
       MONGO_DB_URI: "mongodb://mongo-primary:27017/test?tls=false&directConnection=true&retryWrites=false&replicaSet=rs0"
       MONGO_DB_COLLECTION: test
