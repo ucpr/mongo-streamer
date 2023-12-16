@@ -53,6 +53,9 @@ services:
       MONGO_DB_COLLECTION: test
       MONGO_DB_DATABASE: test
       METRICS_ADDR: :8080
+      PUBSUB_PROJECT_ID: "dummy-project"
+      PUBSUB_TOPIC_ID: "dummy-topic"
+      PUBSUB_EMULATOR_HOST: "localhost:8085"
 
   prometheus:
     image: prom/prometheus
@@ -61,7 +64,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitors/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./monitors/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
     command: "--config.file=/etc/prometheus/prometheus.yaml"
     restart: always
 
@@ -69,6 +72,10 @@ services:
     image: grafana/grafana
     depends_on:
       - prometheus
+    volumes:
+      - ./monitors/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitors/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./monitors/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
     ports:
       - "3000:3000"
     restart: always
