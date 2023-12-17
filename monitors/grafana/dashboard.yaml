@@ -11,3 +11,13 @@ providers:
     options:
       path: /var/lib/grafana/dashboards/go_metrics.json
       foldersFromFilesStructure: false
+  - name: 'mongo-streamer'
+    orgId: 1
+    folder: 'Default'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/mongo_streamer.json
+      foldersFromFilesStructure: false
