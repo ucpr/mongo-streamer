@@ -37,9 +37,19 @@ jobs:
             type=semver,pattern={{version}}
             type=sha,format=long
 
+      - name: Set timestamp
+        id: timestamp
+        env:
+          TZ: 'UTC'
+        run: echo "TIMESTAMP=$(date -u '+%Y-%m-%d_%I:%M:%S%p')" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5.1.0
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args:
+            VERSION=${{ steps.meta.outputs.tags }}
+            REVISION=${{ github.sha }}
+            TIMESTAMP=${{ steps.timestamp.outputs.TIMESTAMP }}

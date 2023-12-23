@@ -1,9 +1,9 @@
 ## Buidler
 FROM golang:1.21.4-alpine3.18 AS builder
 
-ENV VERSION=""
-ENV REVISION=""
-ENV TIMESTAMP=""
+ARG VERSION
+ARG REVISION
+ARG TIMESTAMP
 
 WORKDIR /app
 
