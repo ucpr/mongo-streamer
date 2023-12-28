@@ -11,8 +11,9 @@ build:
 
 .PHONY: test
 test: PKG ?= ./...
+test: FLAGS ?=
 test:
-	$(GO) test -race $(PKG)
+	$(GO) test -race $(PKG) $(FLAGS)
 
 .PHONY: integration-test
 integration-test: PKG ?= ./...
