@@ -10,6 +10,7 @@ import (
 	"cloud.google.com/go/pubsub"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/ucpr/mongo-streamer/internal/config"
 )
 
 //nolint:paralleltest
@@ -18,7 +19,10 @@ func TestPublisher_AsyncPublish(t *testing.T) {
 
 	cli, err := pubsub.NewClient(ctx, testProjectID)
 	require.NoError(t, err)
-	publisher, err := NewPublisher(ctx, testProjectID, testTopicID)
+	publisher, err := NewPublisher(ctx, &config.PubSub{
+		ProjectID: testProjectID,
+		TopicID:   testTopicID,
+	})
 	require.NoError(t, err)
 
 	type (
