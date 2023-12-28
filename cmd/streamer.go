@@ -22,7 +22,13 @@ func NewStreamer(ctx context.Context, cli *mongo.Client, mcfg *config.MongoDB, e
 	if err != nil {
 		return nil, err
 	}
-	cs, err := mongo.NewChangeStream(ctx, cli, mcfg.Database, mcfg.Collection, eh.EventHandler, st)
+	cs, err := mongo.NewChangeStream(ctx, mongo.ChangeStreamParams{
+		Client:     cli,
+		Handler:    eh.EventHandler,
+		Storage:    st,
+		Database:   mcfg.Database,
+		Collection: mcfg.Collection,
+	})
 	if err != nil {
 		return nil, err
 	}
