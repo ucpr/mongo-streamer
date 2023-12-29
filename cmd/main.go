@@ -10,13 +10,7 @@ import (
 	"time"
 
 	"github.com/ucpr/mongo-streamer/pkg/log"
-)
-
-var (
-	// inject by ldflags
-	BuildVersion   = ""
-	BuildRevision  = ""
-	BuildTimestamp = ""
+	"github.com/ucpr/mongo-streamer/pkg/stamp"
 )
 
 const (
@@ -25,9 +19,9 @@ const (
 
 func main() {
 	log.Info("initializing mongo-streamer",
-		slog.String("version", BuildVersion),
-		slog.String("revision", BuildRevision),
-		slog.String("timestamp", BuildTimestamp),
+		slog.String("version", stamp.BuildVersion),
+		slog.String("revision", stamp.BuildRevision),
+		slog.String("timestamp", stamp.BuildTimestamp),
 	)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 	defer stop()

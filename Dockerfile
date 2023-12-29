@@ -9,7 +9,7 @@ WORKDIR /app
 
 COPY ./ ./
 
-RUN go mod download && go build -ldflags "-X main.BuildVersion=${VERSION} -X main.BuildRevision=${REVISION} -X main.BuildTimestamp=${TIMESTAMP}" -o ./build/mongo-streamer ./cmd
+RUN go mod download && go build -ldflags "-X github.com/ucpr/mongo-streamer/pkg/stamp.BuildVersion=${VERSION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildRevision=${REVISION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildTimestamp=${TIMESTAMP}" -o ./build/mongo-streamer ./cmd
 
 ## Runner
 FROM alpine:3.18
