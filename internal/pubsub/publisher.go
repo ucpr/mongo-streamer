@@ -30,9 +30,15 @@ type Message struct {
 	OrderingKey string
 }
 
+// PublishResult is an interface for pubsub.PublishResult.
+type PublishResult interface {
+	Ready() <-chan struct{}
+	Get(ctx context.Context) (serverID string, err error)
+}
+
 // Pulisher is an interface for PubSub Publisher.
 type Publisher interface {
-	AsyncPublish(ctx context.Context, msg Message) *pubsub.PublishResult
+	AsyncPublish(ctx context.Context, msg Message) PublishResult
 }
 
 // PubSubPublisher is a publisher for Google Cloud Pub/Sub.
@@ -66,7 +72,7 @@ func NewPublisher(ctx context.Context, cfg *config.PubSub) (*PubSubPublisher, er
 }
 
 // Publish publishes a message to the topic.
-func (p *PubSubPublisher) AsyncPublish(ctx context.Context, msg Message) *pubsub.PublishResult {
+func (p *PubSubPublisher) AsyncPublish(ctx context.Context, msg Message) PublishResult {
 	result := p.topic.Publish(ctx, &pubsub.Message{
 		Data:        msg.Data,
 		Attributes:  msg.Attributes,
