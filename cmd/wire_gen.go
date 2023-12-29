@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"github.com/ucpr/mongo-streamer/internal/app"
 	"github.com/ucpr/mongo-streamer/internal/config"
 	"github.com/ucpr/mongo-streamer/internal/http"
 	"github.com/ucpr/mongo-streamer/internal/mongo"
@@ -33,8 +34,8 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 	if err != nil {
 		return nil, err
 	}
-	eventHandler := NewEventHandler(pubSubPublisher)
-	streamer, err := NewStreamer(ctx, client, mongoDB, eventHandler)
+	handler := app.NewHandler(pubSubPublisher)
+	streamer, err := NewStreamer(ctx, client, mongoDB, handler)
 	if err != nil {
 		return nil, err
 	}

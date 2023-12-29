@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -8,18 +8,17 @@ import (
 	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
-type EventHandler struct {
+type Handler struct {
 	pubsub pubsub.Publisher
 }
 
-func NewEventHandler(ps pubsub.Publisher) *EventHandler {
-	return &EventHandler{
+func NewHandler(ps pubsub.Publisher) *Handler {
+	return &Handler{
 		pubsub: ps,
 	}
 }
 
-func (e *EventHandler) EventHandler(ctx context.Context, event []byte) error {
-	log.Info("event", slog.String("event", string(event)))
+func (e *Handler) EventHandler(ctx context.Context, event []byte) error {
 	res := e.pubsub.AsyncPublish(ctx, pubsub.Message{
 		Data: event,
 	})

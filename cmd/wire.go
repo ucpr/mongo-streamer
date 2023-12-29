@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/wire"
 
+	"github.com/ucpr/mongo-streamer/internal/app"
 	"github.com/ucpr/mongo-streamer/internal/config"
 	"github.com/ucpr/mongo-streamer/internal/http"
 	"github.com/ucpr/mongo-streamer/internal/mongo"
@@ -18,8 +19,8 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 		config.Set,
 		mongo.Set,
 		pubsub.Set,
+		app.NewHandler,
 		NewStreamer,
-		NewEventHandler,
 	)
 	return nil, nil
 }
