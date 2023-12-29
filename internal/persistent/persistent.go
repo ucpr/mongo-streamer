@@ -1,3 +1,5 @@
+//go:generate mockgen -package=mock -source=$GOFILE -destination=./mock/$GOFILE
+
 package persistent
 
 import (

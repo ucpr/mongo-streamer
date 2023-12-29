@@ -10,6 +10,7 @@ require (
 	github.com/sethvargo/go-envconfig v0.9.0
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.13.0
+	go.uber.org/mock v0.4.0
 )
 
 require (
