@@ -9,9 +9,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
 	mmetric "github.com/ucpr/mongo-streamer/internal/metric/mongo"
 	"github.com/ucpr/mongo-streamer/internal/persistent"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 type (

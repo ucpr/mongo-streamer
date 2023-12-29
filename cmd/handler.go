@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
 	"github.com/ucpr/mongo-streamer/internal/pubsub"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 type EventHandler struct {

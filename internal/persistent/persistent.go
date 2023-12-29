@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 const (

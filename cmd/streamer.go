@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/ucpr/mongo-streamer/internal/config"
-	"github.com/ucpr/mongo-streamer/internal/log"
 	"github.com/ucpr/mongo-streamer/internal/mongo"
 	"github.com/ucpr/mongo-streamer/internal/persistent"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 type Streamer struct {

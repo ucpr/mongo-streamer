@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 func health(w http.ResponseWriter, r *http.Request) {

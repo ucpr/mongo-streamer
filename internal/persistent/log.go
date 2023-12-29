@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/ucpr/mongo-streamer/internal/log"
+	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 // Log is a writer that writes to the log.
