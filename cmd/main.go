@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"net/http"
 	"os/signal"
 	"syscall"
@@ -19,9 +18,9 @@ const (
 
 func main() {
 	log.Info("initializing mongo-streamer",
-		slog.String("version", stamp.BuildVersion),
-		slog.String("revision", stamp.BuildRevision),
-		slog.String("timestamp", stamp.BuildTimestamp),
+		log.Fstring("version", stamp.BuildVersion),
+		log.Fstring("revision", stamp.BuildRevision),
+		log.Fstring("timestamp", stamp.BuildTimestamp),
 	)
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 	defer stop()

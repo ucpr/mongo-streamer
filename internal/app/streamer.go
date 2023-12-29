@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ucpr/mongo-streamer/internal/pubsub"
 	"github.com/ucpr/mongo-streamer/pkg/log"
@@ -26,6 +25,6 @@ func (e *Handler) EventHandler(ctx context.Context, event []byte) error {
 	if err != nil {
 		return err
 	}
-	log.Info("successful publish event", slog.String("id", id))
+	log.Info("successful publish event", log.Fstring("id", id))
 	return nil
 }

@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -75,7 +74,7 @@ func NewChangeStream(ctx context.Context, params ChangeStreamParams, opts ...Cha
 	if err != nil {
 		// if resume token is not found, reset resume token and retry
 		if errors.Is(err, mongo.ErrMissingResumeToken) {
-			log.Warn("resume token is not found, reset resume token and retry", slog.String("db", db), slog.String("col", col))
+			log.Warn("resume token is not found, reset resume token and retry", log.Fstring("db", db), log.Fstring("col", col))
 			chopts.SetResumeAfter(nil)
 			if err := params.Storage.Clear(); err != nil {
 				return nil, err
@@ -108,7 +107,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 		var streamObject bson.M
 		if err := c.cs.Decode(&streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to decode steream object", slog.String("err", err.Error()))
+			log.Error("failed to decode steream object", log.Ferror(err))
 			continue
 		}
 
@@ -116,14 +115,14 @@ func (c *ChangeStream) Run(ctx context.Context) {
 		jb, err := bson.MarshalExtJSON(streamObject, false, false)
 		if err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to marshal stream object", slog.String("err", err.Error()))
+			log.Error("failed to marshal stream object", log.Ferror(err))
 			continue
 		}
 		mmetric.ReceiveBytes(c.db, c.col, len(jb))
 
 		if err := c.handler(context.Background(), jb); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to handle change stream", slog.String("err", err.Error()))
+			log.Error("failed to handle change stream", log.Ferror(err))
 			// TODO: If handle fails, the process is repeated again
 			continue
 		}
@@ -131,7 +130,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 
 		// save resume token
 		if err := c.tokenManager.Set(c.resumeToken()); err != nil {
-			log.Error("failed to save resume token", slog.String("err", err.Error()))
+			log.Error("failed to save resume token", log.Ferror(err))
 			continue
 		}
 	}

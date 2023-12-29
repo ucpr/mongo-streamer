@@ -2,7 +2,6 @@ package persistent
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/ucpr/mongo-streamer/pkg/log"
 )
@@ -20,7 +19,7 @@ func NewLogWriter() *Log {
 }
 
 func (l *Log) Write(s string) error {
-	log.Info("persistent: write data", slog.String("data", s))
+	log.Info("persistent: write data", log.Fstring("data", s))
 	return nil
 }
 
