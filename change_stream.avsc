@@ -1,0 +1,63 @@
+{
+  "type": "record",
+  "name": "MongoStreamer",
+  "fields": [
+    {
+      "name": "_id",
+      "type": "string"
+    },
+    {
+      "name": "operationType",
+      "type": "string"
+    },
+    {
+      "name": "fullDocument",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "documentKey",
+      "type": "string"
+    },
+    {
+      "name": "updateDescription",
+      "type": ["null", {
+        "type": "record",
+        "name": "UpdateDescription",
+        "fields": [
+          {
+            "name": "updatedFields",
+            "type": "string"
+          },
+          {
+            "name": "removedFields",
+            "type": "string"
+          }
+        ]
+      }],
+      "default": null
+    },
+    {
+      "name": "ns",
+      "type": {
+        "type": "record",
+        "name": "Namespace",
+        "fields": [
+          {
+            "name": "db",
+            "type": "string"
+          },
+          {
+            "name": "coll",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "to",
+      "type": ["null", "Namespace"],
+      "default": null
+    }
+  ]
+}
