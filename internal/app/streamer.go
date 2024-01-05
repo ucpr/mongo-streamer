@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ucpr/mongo-streamer/internal/mongo"
+	"github.com/ucpr/mongo-streamer/internal/model"
 	"github.com/ucpr/mongo-streamer/internal/pubsub"
 	"github.com/ucpr/mongo-streamer/pkg/log"
 )
@@ -19,7 +19,7 @@ func NewHandler(ps pubsub.Publisher) *Handler {
 	}
 }
 
-func (e *Handler) EventHandler(ctx context.Context, event mongo.ChangeEvent) error {
+func (e *Handler) EventHandler(ctx context.Context, event model.ChangeEvent) error {
 	data, err := json.Marshal(event)
 	if err != nil {
 		return err

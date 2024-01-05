@@ -9,34 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	mmetric "github.com/ucpr/mongo-streamer/internal/metric/mongo"
+	"github.com/ucpr/mongo-streamer/internal/model"
 	"github.com/ucpr/mongo-streamer/internal/persistent"
 	"github.com/ucpr/mongo-streamer/pkg/log"
 )
 
 type (
-	// ChangeEvent is a struct that represents a change stream event.
-	ChangeEvent struct {
-		ID                string             `avro:"_id" bson:"_id" json:"_id"`
-		OperationType     string             `avro:"operationType" bson:"operation_type" json:"operation_type"`
-		FullDocument      []byte             `avro:"fullDocument" bson:"full_document" json:"full_document"`
-		DocumentKey       string             `avro:"documentKey" bson:"document_key" json:"document_key"`
-		UpdateDescription *UpdateDescription `avro:"updateDescription" bson:"update_description" json:"update_description"`
-		Namespace         Namespace          `avro:"ns" bson:"namespace" json:"namespace"`
-		To                *Namespace         `avro:"to" bson:"to" json:"to"`
-	}
-
-	// UpdateDescription is a struct that represents an update description of change stream event.
-	UpdateDescription struct {
-		UpdatedFields string `avro:"updatedFields" bson:"updated_fields" json:"updated_fields"`
-		RemovedFields string `avro:"removedFields" bson:"removed_fields" json:"removed_fields"`
-	}
-
-	// Namespace is a struct that represents a namespace of change stream event.
-	Namespace struct {
-		DB   string `avro:"db" bson:"db" json:"db"`
-		Coll string `avro:"coll" bson:"coll" json:"coll"`
-	}
-
 	// ChangeStream is a struct that represents a change stream.
 	ChangeStream struct {
 		cs           *mongo.ChangeStream
@@ -55,7 +33,7 @@ type (
 	ChangeStreamOption func(opts *ChangeStreamOptions)
 
 	// ChangeStreamHandler is a type of handler function that handles ChangeStream.
-	ChangeStreamHandler func(ctx context.Context, event ChangeEvent) error
+	ChangeStreamHandler func(ctx context.Context, event model.ChangeEvent) error
 )
 
 // WithBatchSize sets the batch size for ChangeStream.
@@ -127,7 +105,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 	for c.cs.Next(ctx) {
 		mmetric.ReceiveChangeStream(c.db, c.col)
 
-		var streamObject ChangeEvent
+		var streamObject model.ChangeEvent
 		if err := c.cs.Decode(&streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
 			log.Error("failed to decode steream object", log.Ferror(err))
