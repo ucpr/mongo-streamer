@@ -1,5 +1,15 @@
 package model
 
+import (
+	_ "embed"
+	"encoding/json"
+
+	"github.com/hamba/avro/v2"
+)
+
+//go:embed schema/change_stream.avsc
+var avroSchema string
+
 type (
 	// ChangeEvent is a struct that represents a change stream event.
 	ChangeEvent struct {
@@ -24,3 +34,28 @@ type (
 		Coll string `avro:"coll" bson:"coll" json:"coll"`
 	}
 )
+
+// Avro returns the avro encoded byte array of the change stream event.
+func (c ChangeEvent) Avro() ([]byte, error) {
+	schema, err := avro.Parse(avroSchema)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := avro.Marshal(schema, c)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+// JSON returns the json encoded byte array of the change stream event.
+func (c ChangeEvent) JSON() ([]byte, error) {
+	b, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
