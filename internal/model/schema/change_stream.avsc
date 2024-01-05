@@ -12,7 +12,7 @@
     },
     {
       "name": "fullDocument",
-      "type": ["null", "string"],
+      "type": ["null", "bytes"],
       "default": null
     },
     {
