@@ -29,11 +29,11 @@ const (
 )
 
 type MongoDB struct {
-	URI        string `env:"URI"`
-	Password   string `env:"PASSWORD"`
-	User       string `env:"USER"`
-	Database   string `env:"DATABASE"`
-	Collection string `env:"COLLECTION"`
+	URI        string `env:"URI, required"`
+	Password   string `env:"PASSWORD, required"`
+	User       string `env:"USER, required"`
+	Database   string `env:"DATABASE, required"`
+	Collection string `env:"COLLECTION, required"`
 }
 
 type PubSub struct {
@@ -47,7 +47,7 @@ type PubSub struct {
 }
 
 type Metrics struct {
-	Addr string `env:"ADDR"`
+	Addr string `env:"ADDR, default=:8080"`
 }
 
 func NewMongoDB(ctx context.Context) (*MongoDB, error) {

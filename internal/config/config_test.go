@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sethvargo/go-envconfig"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,13 +15,15 @@ func TestMongoDB(t *testing.T) {
 		name  string
 		setup func(t *testing.T)
 		want  *MongoDB
+		err   error
 	}{
 		{
 			name: "default",
 			setup: func(t *testing.T) {
 				t.Helper()
 			},
-			want: &MongoDB{},
+			want: nil,
+			err:  envconfig.ErrMissingRequired,
 		},
 		{
 			name: "set envs",
@@ -48,7 +51,9 @@ func TestMongoDB(t *testing.T) {
 			tt.setup(t)
 
 			got, err := NewMongoDB(ctx)
-			assert.NoError(t, err)
+			if err != nil {
+				assert.ErrorIs(t, err, tt.err)
+			}
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -112,7 +117,9 @@ func TestMetrics(t *testing.T) {
 			setup: func(t *testing.T) {
 				t.Helper()
 			},
-			want: &Metrics{},
+			want: &Metrics{
+				Addr: ":8080",
+			},
 		},
 		{
 			name: "set envs",
