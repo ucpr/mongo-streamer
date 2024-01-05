@@ -20,6 +20,14 @@ const (
 	mrtricsPrefix = "METRICS_"
 )
 
+// PublishFormat is the format of the message to publish.
+const (
+	// PublishFormatJSON is the JSON format.
+	PubSubPublishFormatJSON = "json"
+	// PublishFormatAvro is the Avro format.
+	PubSubPublishFormatAvro = "avro"
+)
+
 type MongoDB struct {
 	URI        string `env:"URI"`
 	Password   string `env:"PASSWORD"`
@@ -29,8 +37,13 @@ type MongoDB struct {
 }
 
 type PubSub struct {
+	// ProjectID is the id of the Google Cloud project to publish messages to.
 	ProjectID string `env:"PROJECT_ID"`
-	TopicID   string `env:"TOPIC_ID"`
+	// TopicID is the id of the topic to publish messages to.
+	TopicID string `env:"TOPIC_ID"`
+	// PublishFormat is the format of the message to publish.
+	// Supported format are: json, avro.
+	PublishFormat string `env:"PUBLISH_FORMAT, default=json"`
 }
 
 type Metrics struct {

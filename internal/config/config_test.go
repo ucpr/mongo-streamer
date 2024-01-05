@@ -67,7 +67,9 @@ func TestPubSub(t *testing.T) {
 			setup: func(t *testing.T) {
 				t.Helper()
 			},
-			want: &PubSub{},
+			want: &PubSub{
+				PublishFormat: PubSubPublishFormatJSON,
+			},
 		},
 		{
 			name: "set envs",
@@ -75,10 +77,12 @@ func TestPubSub(t *testing.T) {
 				t.Helper()
 				t.Setenv("PUBSUB_PROJECT_ID", "project")
 				t.Setenv("PUBSUB_TOPIC_ID", "topic")
+				t.Setenv("PUBSUB_PUBLISH_FORMAT", "avro")
 			},
 			want: &PubSub{
-				ProjectID: "project",
-				TopicID:   "topic",
+				ProjectID:     "project",
+				TopicID:       "topic",
+				PublishFormat: PubSubPublishFormatAvro,
 			},
 		},
 	}

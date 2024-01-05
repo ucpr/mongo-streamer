@@ -2,13 +2,14 @@ package mongo
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	mmetric "github.com/ucpr/mongo-streamer/internal/metric/mongo"
+	"github.com/ucpr/mongo-streamer/internal/model"
 	"github.com/ucpr/mongo-streamer/internal/persistent"
 	"github.com/ucpr/mongo-streamer/pkg/log"
 )
@@ -32,7 +33,7 @@ type (
 	ChangeStreamOption func(opts *ChangeStreamOptions)
 
 	// ChangeStreamHandler is a type of handler function that handles ChangeStream.
-	ChangeStreamHandler func(ctx context.Context, event []byte) error
+	ChangeStreamHandler func(ctx context.Context, event model.ChangeEvent) error
 )
 
 // WithBatchSize sets the batch size for ChangeStream.
@@ -104,7 +105,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 	for c.cs.Next(ctx) {
 		mmetric.ReceiveChangeStream(c.db, c.col)
 
-		var streamObject bson.M
+		var streamObject model.ChangeEvent
 		if err := c.cs.Decode(&streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
 			log.Error("failed to decode steream object", log.Ferror(err))
@@ -112,15 +113,14 @@ func (c *ChangeStream) Run(ctx context.Context) {
 		}
 
 		// marshal stream object to json
-		jb, err := bson.MarshalExtJSON(streamObject, false, false)
+		jb, err := json.Marshal(streamObject)
 		if err != nil {
-			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to marshal stream object", log.Ferror(err))
-			continue
+			// skip for metrics retention use
+			log.Error("failed to marshal stream object to json", log.Ferror(err))
 		}
 		mmetric.ReceiveBytes(c.db, c.col, len(jb))
 
-		if err := c.handler(context.Background(), jb); err != nil {
+		if err := c.handler(context.Background(), streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
 			log.Error("failed to handle change stream", log.Ferror(err))
 			// TODO: If handle fails, the process is repeated again

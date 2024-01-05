@@ -78,6 +78,7 @@ services:
       PUBSUB_PROJECT_ID: "dummy-project"
       PUBSUB_TOPIC_ID: "dummy-topic"
       PUBSUB_EMULATOR_HOST: "pubsub-emulator:8085"
+      PUBSUB_PUBLISH_FORMAT: "json"
 
   prometheus:
     image: prom/prometheus
