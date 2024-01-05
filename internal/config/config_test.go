@@ -68,7 +68,7 @@ func TestPubSub(t *testing.T) {
 				t.Helper()
 			},
 			want: &PubSub{
-				PublishFormat: "json",
+				PublishFormat: PubSubPublishFormatJSON,
 			},
 		},
 		{
@@ -82,7 +82,7 @@ func TestPubSub(t *testing.T) {
 			want: &PubSub{
 				ProjectID:     "project",
 				TopicID:       "topic",
-				PublishFormat: "avro",
+				PublishFormat: PubSubPublishFormatAvro,
 			},
 		},
 	}

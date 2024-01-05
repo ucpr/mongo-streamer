@@ -7,7 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
-	"github.com/ucpr/mongo-streamer/internal/pubsub"
+	"github.com/ucpr/mongo-streamer/internal/config"
+	"github.com/ucpr/mongo-streamer/internal/model"
 	"github.com/ucpr/mongo-streamer/internal/pubsub/mock"
 )
 
@@ -20,23 +21,50 @@ func TestHandler_EventHandler(t *testing.T) {
 		publishResult *mock.MockPublishResult
 	}
 	patterns := []struct {
-		name     string
-		injector func(t *testing.T, mc *mc)
-		event    []byte
-		err      error
+		name          string
+		injector      func(t *testing.T, mc *mc)
+		event         model.ChangeEvent
+		publishFormat string
+		err           error
 	}{
 		{
-			name: "success handle event",
+			name: "success handle event with json format",
 			injector: func(t *testing.T, mc *mc) {
 				t.Helper()
 
 				mc.publishResult.EXPECT().Get(ctx).Return("id", nil).Times(1)
-				mc.publisher.EXPECT().AsyncPublish(ctx, pubsub.Message{
-					Data: []byte("data"),
-				}).Return(mc.publishResult).Times(1)
+				mc.publisher.EXPECT().AsyncPublish(ctx, gomock.Any()).Return(mc.publishResult).Times(1)
 			},
-			event: []byte("data"),
-			err:   nil,
+			event: model.ChangeEvent{
+				ID: "id",
+			},
+			publishFormat: config.PubSubPublishFormatJSON,
+			err:           nil,
+		},
+		{
+			name: "success handle event with avro format",
+			injector: func(t *testing.T, mc *mc) {
+				t.Helper()
+
+				mc.publishResult.EXPECT().Get(ctx).Return("id", nil).Times(1)
+				mc.publisher.EXPECT().AsyncPublish(ctx, gomock.Any()).Return(mc.publishResult).Times(1)
+			},
+			event: model.ChangeEvent{
+				ID: "id",
+			},
+			publishFormat: config.PubSubPublishFormatAvro,
+			err:           nil,
+		},
+		{
+			name: "invalid publish format",
+			injector: func(t *testing.T, mc *mc) {
+				t.Helper()
+			},
+			event: model.ChangeEvent{
+				ID: "id",
+			},
+			publishFormat: "invalid_format",
+			err:           ErrInvalidPublishFormat,
 		},
 		{
 			name: "failed to publish event",
@@ -44,12 +72,13 @@ func TestHandler_EventHandler(t *testing.T) {
 				t.Helper()
 
 				mc.publishResult.EXPECT().Get(ctx).Return("", assert.AnError).Times(1)
-				mc.publisher.EXPECT().AsyncPublish(ctx, pubsub.Message{
-					Data: []byte("data"),
-				}).Return(mc.publishResult).Times(1)
+				mc.publisher.EXPECT().AsyncPublish(ctx, gomock.Any()).Return(mc.publishResult).Times(1)
 			},
-			event: []byte("data"),
-			err:   assert.AnError,
+			event: model.ChangeEvent{
+				ID: "id",
+			},
+			publishFormat: config.PubSubPublishFormatJSON,
+			err:           assert.AnError,
 		},
 	}
 
@@ -66,9 +95,11 @@ func TestHandler_EventHandler(t *testing.T) {
 				publishResult: mpr,
 			})
 
-			h := NewHandler(mp)
-			got := h.EventHandler(ctx, tt.event)
-			assert.Equal(t, tt.err, got)
+			h := NewHandler(mp, &config.PubSub{
+				PublishFormat: tt.publishFormat,
+			})
+			err := h.EventHandler(ctx, tt.event)
+			assert.Equal(t, tt.err, err)
 		})
 	}
 }

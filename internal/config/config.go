@@ -20,6 +20,14 @@ const (
 	mrtricsPrefix = "METRICS_"
 )
 
+// PublishFormat is the format of the message to publish.
+const (
+	// PublishFormatJSON is the JSON format.
+	PubSubPublishFormatJSON = "json"
+	// PublishFormatAvro is the Avro format.
+	PubSubPublishFormatAvro = "avro"
+)
+
 type MongoDB struct {
 	URI        string `env:"URI"`
 	Password   string `env:"PASSWORD"`
