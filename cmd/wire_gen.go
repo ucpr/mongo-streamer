@@ -34,7 +34,7 @@ func injectStreamer(ctx context.Context) (*Streamer, error) {
 	if err != nil {
 		return nil, err
 	}
-	handler := app.NewHandler(pubSubPublisher)
+	handler := app.NewHandler(pubSubPublisher, pubSub)
 	streamer, err := NewStreamer(ctx, client, mongoDB, handler)
 	if err != nil {
 		return nil, err
