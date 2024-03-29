@@ -1,6 +1,8 @@
 module github.com/ucpr/mongo-streamer
 
-go 1.21.1
+go 1.22
+
+toolchain go1.22.1
 
 require (
 	cloud.google.com/go/logging v1.8.1
@@ -8,7 +10,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/hamba/avro/v2 v2.18.0
 	github.com/prometheus/client_golang v1.17.0
-	github.com/sethvargo/go-envconfig v0.9.0
+	github.com/sethvargo/go-envconfig v1.0.1
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.13.0
 	go.uber.org/mock v0.4.0
@@ -26,7 +28,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect

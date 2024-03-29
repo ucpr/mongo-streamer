@@ -53,7 +53,10 @@ type Metrics struct {
 func NewMongoDB(ctx context.Context) (*MongoDB, error) {
 	conf := &MongoDB{}
 	pl := envconfig.PrefixLookuper(mongoDBPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +66,10 @@ func NewMongoDB(ctx context.Context) (*MongoDB, error) {
 func NewPubSub(ctx context.Context) (*PubSub, error) {
 	conf := &PubSub{}
 	pl := envconfig.PrefixLookuper(pubSubPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		return nil, err
 	}
 
@@ -73,7 +79,10 @@ func NewPubSub(ctx context.Context) (*PubSub, error) {
 func NewMetrics(ctx context.Context) (*Metrics, error) {
 	conf := &Metrics{}
 	pl := envconfig.PrefixLookuper(mrtricsPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		return nil, err
 	}
 
