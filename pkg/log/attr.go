@@ -23,6 +23,8 @@ var (
 	Fduration = slog.Duration
 	// Fany is alias for slog.Any
 	Fany = slog.Any
+	// With is alias for slog.With
+	With = slog.With
 )
 
 // Ferror is return error attribute

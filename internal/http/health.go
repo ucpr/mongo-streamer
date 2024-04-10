@@ -10,6 +10,6 @@ func health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write([]byte("OK")); err != nil {
-		log.Error("failed to write response: %v", err)
+		log.Error("Failed to write response: %v", err)
 	}
 }

@@ -65,10 +65,10 @@ func (b *Buffer) Watch(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			if err := b.Flush(); err != nil {
-				log.Info("failed to flush buffer", err)
+				log.Info("Failed to flush buffer", err)
 			}
 		case <-ctx.Done():
-			log.Info("buffer watcher stopped")
+			log.Info("Buffer watcher stopped")
 			return
 		}
 	}
@@ -145,7 +145,7 @@ func (b *Buffer) Clear() error {
 func (b *Buffer) Close(ctx context.Context) error {
 	defer func() {
 		if err := b.storage.Close(ctx); err != nil {
-			log.Error("failed to close file", err)
+			log.Error("Failed to close file", err)
 		}
 	}()
 	return b.Flush()

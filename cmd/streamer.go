@@ -46,7 +46,7 @@ func (s *Streamer) Stream(ctx context.Context) {
 		s.st.Watch(ctx)
 	}()
 
-	log.Info("starting change stream watcher")
+	log.Info("Start change stream watcher")
 	s.cs.Run(ctx)
 }
 

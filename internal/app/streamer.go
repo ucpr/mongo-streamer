@@ -37,7 +37,7 @@ func (e *Handler) EventHandler(ctx context.Context, event model.ChangeEvent) err
 	if err != nil {
 		return err
 	}
-	log.Info("successful publish event", log.Fstring("id", id))
+	log.Info("Successful publish event", log.Fstring("id", id))
 	return nil
 }
 

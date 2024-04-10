@@ -19,17 +19,17 @@ func NewLogWriter() *Log {
 }
 
 func (l *Log) Write(s string) error {
-	log.Info("persistent: write data", log.Fstring("data", s))
+	log.Info("Persistent: write data", log.Fstring("data", s))
 	return nil
 }
 
 func (l *Log) Clear() error {
-	log.Info("persistent: clear data")
+	log.Info("Persistent: clear data")
 	return nil
 }
 
 func (l *Log) Read() (string, error) {
-	log.Info("persistent: read data")
+	log.Info("Persistent: read data")
 	return "", nil
 }
 

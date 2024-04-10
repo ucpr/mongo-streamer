@@ -75,7 +75,7 @@ func NewChangeStream(ctx context.Context, params ChangeStreamParams, opts ...Cha
 	if err != nil {
 		// if resume token is not found, reset resume token and retry
 		if errors.Is(err, mongo.ErrMissingResumeToken) {
-			log.Warn("resume token is not found, reset resume token and retry", log.Fstring("db", db), log.Fstring("col", col))
+			log.Warn("Resume token is not found, reset resume token and retry", log.Fstring("db", db), log.Fstring("col", col))
 			chopts.SetResumeAfter(nil)
 			if err := params.Storage.Clear(); err != nil {
 				return nil, err
@@ -108,7 +108,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 		var streamObject model.ChangeEvent
 		if err := c.cs.Decode(&streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to decode steream object", log.Ferror(err))
+			log.Error("Failed to decode steream object", log.Ferror(err))
 			continue
 		}
 
@@ -116,13 +116,13 @@ func (c *ChangeStream) Run(ctx context.Context) {
 		jb, err := json.Marshal(streamObject)
 		if err != nil {
 			// skip for metrics retention use
-			log.Error("failed to marshal stream object to json", log.Ferror(err))
+			log.Error("Failed to marshal stream object to json", log.Ferror(err))
 		}
 		mmetric.ReceiveBytes(c.db, c.col, len(jb))
 
 		if err := c.handler(context.Background(), streamObject); err != nil {
 			mmetric.HandleChangeEventFailed(c.db, c.col)
-			log.Error("failed to handle change stream", log.Ferror(err))
+			log.Error("Failed to handle change stream", log.Ferror(err))
 			// TODO: If handle fails, the process is repeated again
 			continue
 		}
@@ -130,7 +130,7 @@ func (c *ChangeStream) Run(ctx context.Context) {
 
 		// save resume token
 		if err := c.tokenManager.Set(c.resumeToken()); err != nil {
-			log.Error("failed to save resume token", log.Ferror(err))
+			log.Error("Failed to save resume token", log.Ferror(err))
 			continue
 		}
 	}
