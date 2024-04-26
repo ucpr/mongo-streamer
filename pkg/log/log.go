@@ -2,8 +2,10 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 
 	"cloud.google.com/go/logging"
 )
@@ -80,13 +82,21 @@ func attrReplacerForCloudLogging(groups []string, attr slog.Attr) slog.Attr {
 	case slog.LevelKey:
 		attr.Key = "severity"
 		attr.Value = slog.StringValue(logging.Severity(attr.Value.Any().(slog.Level)).String())
+		// Replace the value of the "severity" attribute with the value of the "level" attribute.
+		level, ok := attr.Value.Any().(slog.Level)
+		if ok {
+			attr.Value = toLogLevel(level)
+		}
 	case slog.SourceKey:
 		attr.Key = "logging.googleapis.com/sourceLocation"
-	}
-	// Replace the value of the "severity" attribute with the value of the "level" attribute.
-	level, ok := attr.Value.Any().(slog.Level)
-	if ok {
-		attr.Value = toLogLevel(level)
+		// Replace the value of the "source" attribute with the value of the "sourceLocation" attribute.
+		const skip = 7
+		_, file, line, ok := runtime.Caller(skip)
+		if !ok {
+			return attr
+		}
+		v := fmt.Sprintf("%s:%d", file, line)
+		attr.Value = slog.StringValue(v)
 	}
 
 	return attr
