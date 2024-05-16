@@ -126,36 +126,84 @@ func toLogLevel(level slog.Level) slog.Value {
 
 // Debug logs a debug message.
 func Debug(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityDebug, msg, attrs...)
+	DebugContext(context.Background(), msg, attrs)
+}
+
+// DebugContext logs a debug message with a context.
+func DebugContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityDebug, msg, attrs...)
 }
 
 // Info logs an info message.
 func Info(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityInfo, msg, attrs...)
+	InfoContext(context.Background(), msg, attrs)
+}
+
+// InfoContext logs an info message with a context.
+func InfoContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityInfo, msg, attrs...)
 }
 
 // Notice logs a notice message.
 func Notice(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityNotice, msg, attrs...)
+	NoticeContext(context.Background(), msg, attrs)
+}
+
+// NoticeContext logs a notice message with a context.
+func NoticeContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityNotice, msg, attrs...)
 }
 
 // Warn logs a warning message.
 func Warn(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityWarning, msg, attrs...)
+	WarnContext(context.Background(), msg, attrs)
+}
+
+// WarnContext logs a warning message with a context.
+func WarnContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityWarning, msg, attrs...)
 }
 
 // Error logs an error message.
 func Error(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityError, msg, attrs...)
+	ErrorContext(context.Background(), msg, attrs)
+}
+
+// ErrorContext logs an error message with a context.
+func ErrorContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityError, msg, attrs...)
 }
 
 // Critical logs a critical message.
 func Critical(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityCritical, msg, attrs...)
+	CriticalContext(context.Background(), msg, attrs)
+}
+
+// CriticalContext logs a critical message with a context.
+func CriticalContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityCritical, msg, attrs...)
 }
 
 // Panic logs a critical message and panics.
 func Panic(msg string, attrs ...any) {
-	logger.Log(context.Background(), SeverityCritical, msg, attrs...)
+	PanicContext(context.Background(), msg, attrs)
 	panic(msg)
+}
+
+// PanicContext logs a critical message with a context and panics.
+func PanicContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityCritical, msg, attrs...)
+	panic(msg)
+}
+
+// Fatal logs a critical message and exits.
+func Fatal(msg string, attrs ...any) {
+	FatalContext(context.Background(), msg, attrs)
+	os.Exit(1)
+}
+
+// FatalContext logs a critical message with a context and exits.
+func FatalContext(ctx context.Context, msg string, attrs ...any) {
+	logger.Log(ctx, SeverityCritical, msg, attrs...)
+	os.Exit(1)
 }
