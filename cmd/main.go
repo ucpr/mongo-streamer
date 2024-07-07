@@ -27,16 +27,16 @@ func main() {
 
 	streamer, err := injectStreamer(ctx)
 	if err != nil {
-		log.Panic("Failed to inject streamer", err)
+		log.Panic("Failed to inject streamer", log.Ferror(err))
 	}
 	srv, err := injectServer(ctx)
 	if err != nil {
-		log.Panic("Failed to inject server", err)
+		log.Panic("Failed to inject server", log.Ferror(err))
 	}
 
 	go func() {
 		if err := srv.Serve(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("Failed to start http server", err)
+			log.Error("Failed to start http server", log.Ferror(err))
 		}
 	}()
 
@@ -48,10 +48,10 @@ func main() {
 	tctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
 	if err := srv.Shutdown(tctx); err != nil {
-		log.Error("Failed to shutdown http server", err)
+		log.Error("Failed to shutdown http server", log.Ferror(err))
 	}
 	if err := streamer.Close(tctx); err != nil {
-		log.Error("Failed to close change stream", err)
+		log.Error("Failed to close change stream", log.Ferror(err))
 	}
 
 	log.Info("Successfully graceful shutdown")
