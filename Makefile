@@ -1,6 +1,12 @@
 NAME := mongo-streamer
 BUILD_DIR := ./build
 GO ?= go
+BIN := $(abspath ./bin)
+
+$(BIN)/wire:
+	GOBIN=$(BIN) go install github.com/google/wire/cmd/wire@latest
+$(BIN)/mockgen:
+	GOBIN=$(BIN) go install go.uber.org/mock/mockgen@latest
 
 .PHONY: build
 build: VERSION := $(shell git describe --tags --always --dirty)
@@ -22,6 +28,7 @@ integration-test:
 	$(GO) test -race $(PKG) -tags=integration
 
 .PHONY: generate
+generate: $(BIN)/wire $(BIN)/mockgen
 generate: PKG ?= ./...
 generate:
-	$(GO) generate $(PKG)
+	GOBIN=$(BIN) $(GO) generate $(PKG)

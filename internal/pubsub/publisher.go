@@ -1,4 +1,4 @@
-//go:generate mockgen -package=mock -source=$GOFILE -destination=./mock/$GOFILE
+//go:generate $GOBIN/mockgen -package=mock -source=$GOFILE -destination=./mock/$GOFILE
 
 package pubsub
 
