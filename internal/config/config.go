@@ -30,8 +30,8 @@ const (
 
 type MongoDB struct {
 	URI        string `env:"URI, required"`
-	Password   string `env:"PASSWORD, required"`
-	User       string `env:"USER, required"`
+	Password   string `env:"PASSWORD"`
+	User       string `env:"USER"`
 	Database   string `env:"DATABASE, required"`
 	Collection string `env:"COLLECTION, required"`
 }
