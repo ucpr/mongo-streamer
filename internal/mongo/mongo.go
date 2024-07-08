@@ -55,3 +55,8 @@ func NewClient(ctx context.Context, cfg *config.MongoDB) (*Client, error) {
 func (c *Client) Disconnect(ctx context.Context) error {
 	return c.cli.Disconnect(ctx)
 }
+
+// Collection returns a collection from the MongoDB client.
+func (c *Client) Collection(name string) *mongo.Collection {
+	return c.cli.Database(c.db).Collection(name)
+}
