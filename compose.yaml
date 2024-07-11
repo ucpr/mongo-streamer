@@ -56,9 +56,14 @@ services:
       - setup-pubsub-emulator
     ports:
       - "8080:8080"
+    develop:
+      watch:
+        - action: rebuild
+          files:
+            - ./
     environment:
       MONGO_DB_URI: "mongodb://mongo:27017/test?tls=false&directConnection=true&retryWrites=false&replicaSet=rs0"
-      MONGO_DB_COLLECTION: test
+      MONGO_DB_COLLECTION: tweets
       MONGO_DB_DATABASE: test
       METRICS_ADDR: :8080
       PUBSUB_PROJECT_ID: "dummy-project"
