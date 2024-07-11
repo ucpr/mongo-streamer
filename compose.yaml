@@ -1,31 +1,26 @@
-version: '3.8'
-
 services:
-  mongo-primary:
+  mongo:
     image: mongo:latest
-    command: >
-      bash -c "
-        echo 'rs.initiate({_id:\"rs0\", members:[{_id:0, host:\"mongo-primary:27017\"}, {_id:1, host:\"mongo-secondary:27017\"}, {_id:2, host:\"mongo-arbiter:27017\", arbiterOnly:true}]});' > /docker-entrypoint-initdb.d/init-replica.js &&
-        mongod --replSet rs0 --bind_ip_all --noauth
-      "
     ports:
-      - "27017:27017"
-
-  mongo-secondary:
-    image: mongo:latest
-    command: mongod --replSet rs0 --bind_ip_all --noauth
-    ports:
-      - "27018:27017"
+      - 27017:27017
     volumes:
-      - secondary_data:/data/db
+      - mongo_data:/data/db
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
-  mongo-arbiter:
+  setup-mongo-replica:
     image: mongo:latest
-    command: mongod --replSet rs0 --bind_ip_all --noauth
-    ports:
-      - "27019:27017"
-    volumes:
-      - arbiter_data:/data/db
+    depends_on:
+      - mongo
+    entrypoint: >
+      sh -c "
+      until mongosh --eval 'print(1)' &>/dev/null; do
+        sleep 1
+      done;
+      mongosh --eval '
+      rs.initiate({
+        _id: \"rs0\",
+        members: [{ _id: 0, host: \"mongodb:27017\" }]
+      })'"
 
   pubsub-emulator:
     image: gcr.io/google.com/cloudsdktool/cloud-sdk:455.0.0-emulators
@@ -57,21 +52,12 @@ services:
     build: .
     restart: always
     depends_on:
-      - mongo-primary
-      - mongo-secondary
-      - mongo-arbiter
+      - setup-mongo-replica
       - setup-pubsub-emulator
     ports:
       - "8080:8080"
-    develop:
-      watch:
-        - action: rebuild
-          files:
-            - ./**/*.go
-            - ./go.mod
-            - ./go.sum
     environment:
-      MONGO_DB_URI: "mongodb://mongo-primary:27017/test?tls=false&directConnection=true&retryWrites=false&replicaSet=rs0"
+      MONGO_DB_URI: "mongodb://mongo:27017/test?tls=false&directConnection=true&retryWrites=false&replicaSet=rs0"
       MONGO_DB_COLLECTION: test
       MONGO_DB_DATABASE: test
       METRICS_ADDR: :8080
@@ -82,8 +68,6 @@ services:
 
   prometheus:
     image: prom/prometheus
-    depends_on:
-      - mongo-streamer
     ports:
       - "9090:9090"
     volumes:
@@ -106,8 +90,6 @@ services:
     restart: always
 
 volumes:
-  primary_data:
-  secondary_data:
-  arbiter_data:
+  mongo_data:
   prometheus_data:
   grafana_data:
