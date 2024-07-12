@@ -74,12 +74,14 @@ func newHandler(opts newHandlerOptions) slog.Handler {
 		})
 	case formatJSON:
 		return slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource:   true,
 			Level:       SeverityInfo,
 			ReplaceAttr: attrReplacerForDefault,
 		})
 	}
 
 	return slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource:   true,
 		Level:       SeverityInfo,
 		ReplaceAttr: attrReplacerForDefault,
 	})
