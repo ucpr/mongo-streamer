@@ -6,91 +6,93 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
-
-	"cloud.google.com/go/logging"
+	"strings"
 )
 
 //nolint:gochecknoglobals
 var (
-	SeverityDefault  = slog.Level(logging.Default)
-	SeverityDebug    = slog.Level(logging.Debug)
-	SeverityInfo     = slog.Level(logging.Info)
-	SeverityNotice   = slog.Level(logging.Notice)
-	SeverityWarning  = slog.Level(logging.Warning)
-	SeverityError    = slog.Level(logging.Error)
-	SeverityCritical = slog.Level(logging.Critical)
+	SeverityDebug    = slog.LevelDebug // -4
+	SeverityInfo     = slog.LevelInfo  // 0
+	SeverityNotice   = slog.Level(2)   // 2
+	SeverityWarning  = slog.LevelWarn  // 4
+	SeverityError    = slog.LevelError // 8
+	SeverityCritical = slog.Level(10)  // 10
+)
+
+// format is the log format type
+type format string
+
+//nolint:unused
+const (
+	// formatGCP is the Google Cloud Platform format.
+	formatGCP format = "gcp"
+	// formatJSON is the JSON format.
+	formatJSON format = "json"
+	// formatText is the text format.
+	formatText format = "text"
 )
 
 // logger is the global logger.
 // it is initialized by init() and should not be modified.
+//
+//nolint:gochecknoglobals
 var logger *slog.Logger
 
 // init initializes the logger.
 func init() {
-	logFormat := os.Getenv("LOG_FORMAT")
+	logFormat := strings.ToLower(os.Getenv("LOG_FORMAT"))
 	service := os.Getenv("SERVICE")
 	env := os.Getenv("ENV")
+	googleProjectID := os.Getenv("GOOGLE_PROJECT_ID")
 
-	handler := newHandler(logFormat, service, env)
+	handler := newHandler(newHandlerOptions{
+		format:          format(logFormat),
+		service:         service,
+		env:             env,
+		googleProjectID: googleProjectID,
+	})
 	logger = slog.New(handler)
 }
 
+type newHandlerOptions struct {
+	format          format
+	service         string
+	env             string
+	googleProjectID string
+}
+
 // newHandler returns a slog.Handler based on the given format.
-func newHandler(format, service, env string) slog.Handler {
-	switch format {
-	case "gcp":
-		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+func newHandler(opts newHandlerOptions) slog.Handler {
+	switch opts.format {
+	case formatGCP:
+		return NewCloudLoggingHandler(os.Stdout, &CloudLoggingHandlerOptions{
 			AddSource:   true,
-			Level:       SeverityDefault,
-			ReplaceAttr: attrReplacerForCloudLogging,
+			Level:       SeverityInfo,
+			Environment: opts.env,
+			Service:     opts.service,
+			ProjectID:   opts.googleProjectID,
 		})
-		handler.WithAttrs([]slog.Attr{
-			slog.Group("logging.googleapis.com/labels",
-				slog.String("app", service),
-				slog.String("env", env),
-			),
-		})
-		return handler
-	case "json":
+	case formatJSON:
 		return slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level:       SeverityDefault,
+			Level:       SeverityInfo,
 			ReplaceAttr: attrReplacerForDefault,
 		})
 	}
 
 	return slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level:       SeverityDefault,
+		Level:       SeverityInfo,
 		ReplaceAttr: attrReplacerForDefault,
 	})
 }
 
 // attrReplacerForDefault is default attribute replacer.
 func attrReplacerForDefault(groups []string, attr slog.Attr) slog.Attr {
-	// Replace the value of the "severity" attribute with the value of the "level" attribute.
-	level, ok := attr.Value.Any().(slog.Level)
-	if ok {
-		attr.Value = toLogLevel(level)
-	}
-	return attr
-}
-
-// attrReplacerForCloudLogging replaces slog's default attributes for Google Cloud Logging.
-func attrReplacerForCloudLogging(groups []string, attr slog.Attr) slog.Attr {
 	switch attr.Key {
-	case slog.MessageKey:
-		attr.Key = "message"
 	case slog.LevelKey:
-		attr.Key = "severity"
-		attr.Value = slog.StringValue(logging.Severity(attr.Value.Any().(slog.Level)).String())
-		// Replace the value of the "severity" attribute with the value of the "level" attribute.
-		level, ok := attr.Value.Any().(slog.Level)
-		if ok {
-			attr.Value = toLogLevel(level)
-		}
+		attr.Value = toLogLevel(attr.Value.Any().(slog.Level))
 	case slog.SourceKey:
-		attr.Key = "logging.googleapis.com/sourceLocation"
 		// Replace the value of the "source" attribute with the value of the "sourceLocation" attribute.
-		const skip = 7
+		const skip = 9
 		_, file, line, ok := runtime.Caller(skip)
 		if !ok {
 			return attr
