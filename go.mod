@@ -10,6 +10,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/hamba/avro/v2 v2.18.0
 	github.com/prometheus/client_golang v1.17.0
+	github.com/remychantenay/slog-otel v1.3.2
 	github.com/sethvargo/go-envconfig v1.0.1
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.13.0

@@ -7,6 +7,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	slogotel "github.com/remychantenay/slog-otel"
 )
 
 //nolint:gochecknoglobals
@@ -30,6 +32,8 @@ const (
 	formatJSON format = "json"
 	// formatText is the text format.
 	formatText format = "text"
+	// formatOtel is the OpenTelemetry format.
+	formatOtel format = "otel"
 )
 
 // logger is the global logger.
@@ -78,6 +82,12 @@ func newHandler(opts newHandlerOptions) slog.Handler {
 			Level:       SeverityInfo,
 			ReplaceAttr: attrReplacerForDefault,
 		})
+	case formatOtel:
+		return slogotel.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource:   true,
+			Level:       SeverityInfo,
+			ReplaceAttr: attrReplacerForDefault,
+		}))
 	}
 
 	return slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
