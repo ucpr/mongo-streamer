@@ -7,9 +7,11 @@ ARG TIMESTAMP
 
 WORKDIR /app
 
-COPY . .
+COPY go.mod go.sum ./
+RUN go mod download 
 
-RUN go mod download && go build -ldflags "-X github.com/ucpr/mongo-streamer/pkg/stamp.BuildVersion=${VERSION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildRevision=${REVISION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildTimestamp=${TIMESTAMP}" -o ./build/mongo-streamer ./cmd
+COPY . .
+RUN go build -ldflags "-X github.com/ucpr/mongo-streamer/pkg/stamp.BuildVersion=${VERSION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildRevision=${REVISION} -X github.com/ucpr/mongo-streamer/pkg/stamp.BuildTimestamp=${TIMESTAMP}" -o ./build/mongo-streamer ./cmd
 
 ## Runner
 FROM alpine:3.18

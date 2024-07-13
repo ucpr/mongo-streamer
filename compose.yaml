@@ -49,7 +49,8 @@ services:
       "
 
   mongo-streamer:
-    build: .
+    build:
+      context: .
     restart: always
     depends_on:
       - setup-mongo-replica
@@ -59,8 +60,13 @@ services:
     develop:
       watch:
         - action: rebuild
-          files:
-            - ./
+          path: .
+          ignore:
+            - .git
+            - .gitignore
+            - README.md
+            - ./bin
+            - ./monitors
     environment:
       MONGO_DB_URI: "mongodb://mongo:27017/test?tls=false&directConnection=true&retryWrites=false&replicaSet=rs0"
       MONGO_DB_COLLECTION: tweets
